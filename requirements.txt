@@ -2,7 +2,7 @@ streamlit
 pandas
 numpy
 plotly
-docx
+python-docx
 reportlab
 langchain-groq
 pandasql
