@@ -1,0 +1,14 @@
+streamlit
+pandas
+numpy
+psycopg2
+python-dotenv
+scikit-learn
+langchain_groq
+reportlab
+python-docx
+joblib
+plotly
+scipy
+gspread
+pandasql
