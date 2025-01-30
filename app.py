@@ -3,8 +3,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
-import psycopg2
-from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, classification_report, confusion_matrix
@@ -21,72 +19,6 @@ from io import BytesIO
 from scipy.stats import zscore
 import gspread
 import pandasql as ps  # Import pandasql for SQL queries
-
-# Load environment variables
-load_dotenv()
-
-# Database setup with error handling
-def init_db():
-    try:
-        conn = psycopg2.connect(
-            host=os.getenv("DB_HOST"),
-            database=os.getenv("DB_NAME"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            port=os.getenv("DB_PORT")
-        )
-        return conn
-    except psycopg2.OperationalError as e:
-        st.error(f"Failed to connect to the database: {e}")
-        return None
-
-# Cache database operations
-@st.cache_data
-def execute_query(query, params=None, fetch_results=True):
-    conn = init_db()
-    if conn is None:
-        return None
-    c = conn.cursor()
-    try:
-        c.execute(query, params or ())
-        if fetch_results:
-            result = c.fetchall()
-        else:
-            conn.commit() 
-            result = None
-        return result
-    except Exception as e:
-        st.error(f"Database error: {e}")
-        return None
-    finally:
-        conn.close()
-
-# User registration
-def register_user(name, username, company, email, password):
-    try:
-        execute_query("""
-            INSERT INTO users (name, username, company, email, password)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (name, username, company, email, password), fetch_results=False)
-        
-        user = login_user(username, password)
-        if user:
-            st.session_state.user = user
-            st.success("Registration successful! You are now logged in.")
-            return True
-        else:
-            st.error("Failed to log in after registration.")
-            return False
-    except psycopg2.IntegrityError:
-        st.error("Username or email already exists.")
-        return False
-
-# User login
-def login_user(username, password):
-    result = execute_query("SELECT * FROM users WHERE username = %s", (username,), fetch_results=True)
-    if result and result[0][5] == password:
-        return result[0]
-    return None
 
 # Function to select operations for cleaning or transformation
 def select_operations(operation_type):
@@ -212,7 +144,7 @@ def get_groq_response(user_prompt, df):
     try:
         llm = ChatGroq(
             temperature=0.7,
-            groq_api_key=os.getenv("GROQ_API_KEY"),
+            groq_api_key=os.getenv("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"),
             model_name="llama3-70b-8192"
         )
         prompt = (
@@ -559,8 +491,9 @@ def main():
         unsafe_allow_html=True,
     )
 
-    if 'user' not in st.session_state:
-        st.session_state.user = None
+    # Removed session state check for user
+    # if 'user' not in st.session_state:
+    #     st.session_state.user = None
 
     if 'df' not in st.session_state:
         st.session_state.df = None
@@ -571,88 +504,57 @@ def main():
     if 'summary' not in st.session_state:
         st.session_state.summary = None
 
-    if st.session_state.user is None:
-        st.title("Welcome to Data Analyst App")
-        st.write("Please login or register to continue.")
+    # Removed login/registration check and tabs
+    # if st.session_state.user is None:
+    #     # ... (Removed login/registration code)
 
-        tab1, tab2 = st.tabs(["Login", "Register"])
-        
-        with tab1:
-            st.header("Login")
-            with st.container():
-                username_login = st.text_input("Username", key="login_username")
-                password_login = st.text_input("Password", type="password", key="login_password")
-                if st.button("Login"):
-                    user = login_user(username_login, password_login)
-                    if user:
-                        st.session_state.user = user
-                        st.success("Logged in successfully!")
-                        st.rerun()
-                    else:
-                        st.error("Invalid username or password.")
+    # Directly go to app functionality 
+    st.title("Data Analyst App")
 
-        with tab2:
-            st.header("Register")
-            with st.container():
-                name = st.text_input("Name", key="register_name")
-                username = st.text_input("Username", key="register_username") 
-                company = st.text_input("Company", key="register_company")
-                email = st.text_input("Email", key="register_email")
-                password = st.text_input("Password", type="password", key="register_password")
-                if st.button("Register"):
-                    if register_user(name, username, company, email, password):
-                        st.rerun()
-                    else:
-                        st.error("Registration failed. Please try again.")
+    st.sidebar.title("Navigation")
+    if st.sidebar.button("Upload Data", key="upload_data"):
+        st.session_state.page = "Upload Data"
+    if st.sidebar.button("Data Cleaning", key="data_cleaning"):
+        st.session_state.page = "Data Cleaning"
+    if st.sidebar.button("Data Transformation", key="data_transformation"):
+        st.session_state.page = "Data Transformation"
+    if st.sidebar.button("Data Visualization", key="data_visualization"):
+        st.session_state.page = "Data Visualization"
+    if st.sidebar.button("AI Chat Platform", key="ai_chat_platform"):
+        st.session_state.page = "AI Chat Platform"
+    if st.sidebar.button("Export Report", key="export_report"):
+        st.session_state.page = "Export Report"
+    if st.sidebar.button("SQL Query and Edit DataFrame", key="sql_query"):
+        st.session_state.page = "SQL Query and Edit DataFrame"
 
-    if st.session_state.user:
-        st.title("Data Analyst App")
-        st.write(f"Welcome, {st.session_state.user[1]}!")
+    if 'page' not in st.session_state:
+        st.session_state.page = "Upload Data"
 
-        st.sidebar.title("Navigation")
-        if st.sidebar.button("Upload Data", key="upload_data"):
-            st.session_state.page = "Upload Data"
-        if st.sidebar.button("Data Cleaning", key="data_cleaning"):
-            st.session_state.page = "Data Cleaning"
-        if st.sidebar.button("Data Transformation", key="data_transformation"):
-            st.session_state.page = "Data Transformation"
-        if st.sidebar.button("Data Visualization", key="data_visualization"):
-            st.session_state.page = "Data Visualization"
-        if st.sidebar.button("AI Chat Platform", key="ai_chat_platform"):
-            st.session_state.page = "AI Chat Platform"
-        if st.sidebar.button("Export Report", key="export_report"):
-            st.session_state.page = "Export Report"
-        if st.sidebar.button("SQL Query and Edit DataFrame", key="sql_query"):
-            st.session_state.page = "SQL Query and Edit DataFrame"
+    if st.session_state.page == "Upload Data":
+        uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+        if uploaded_file is not None:
+            st.session_state.df = pd.read_csv(uploaded_file)
+            st.session_state.uploaded_file = uploaded_file
+            st.write("### Data Preview")
+            st.dataframe(st.session_state.df, height=300, use_container_width=True)
 
-        if 'page' not in st.session_state:
-            st.session_state.page = "Upload Data"
+    elif st.session_state.page == "Data Cleaning":
+        cleaning_page()
 
-        if st.session_state.page == "Upload Data":
-            uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
-            if uploaded_file is not None:
-                st.session_state.df = pd.read_csv(uploaded_file)
-                st.session_state.uploaded_file = uploaded_file
-                st.write("### Data Preview")
-                st.dataframe(st.session_state.df, height=300, use_container_width=True)
+    elif st.session_state.page == "Data Transformation":
+        transformation_page()
 
-        elif st.session_state.page == "Data Cleaning":
-            cleaning_page()
+    elif st.session_state.page == "Data Visualization":
+        visualization_page()
 
-        elif st.session_state.page == "Data Transformation":
-            transformation_page()
+    elif st.session_state.page == "AI Chat Platform":
+        ai_chat_page()
 
-        elif st.session_state.page == "Data Visualization":
-            visualization_page()
+    elif st.session_state.page == "Export Report":
+        export_report_page()
 
-        elif st.session_state.page == "AI Chat Platform":
-            ai_chat_page()
-
-        elif st.session_state.page == "Export Report":
-            export_report_page()
-
-        elif st.session_state.page == "SQL Query and Edit DataFrame":
-            sql_query_page()
+    elif st.session_state.page == "SQL Query and Edit DataFrame":
+        sql_query_page()
 
 if __name__ == '__main__':
     main() 
