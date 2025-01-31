@@ -9,5 +9,5 @@ joblib
 pandasql==0.7.3
 scipy==1.7.1
 # Add these to handle distutils issue
-setuptools>=40.8.0 
+setuptools==67.6.0   
 wheel
