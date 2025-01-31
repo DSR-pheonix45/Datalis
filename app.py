@@ -18,6 +18,7 @@ import plotly.graph_objects as go
 from io import BytesIO
 from scipy.stats import zscore
 import gspread
+import os
 import pandasql as ps  # Import pandasql for SQL queries
 
 # Function to select operations for cleaning or transformation
