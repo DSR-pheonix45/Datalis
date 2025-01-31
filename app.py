@@ -2,7 +2,7 @@ import docx
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
+import distutils.core
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, classification_report, confusion_matrix
