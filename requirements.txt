@@ -9,6 +9,7 @@ joblib
 pandasql
 scipy
 gspread
+scikit-learn
 # Add these to handle distutils issue
 setuptools==67.6.0   
 wheel
