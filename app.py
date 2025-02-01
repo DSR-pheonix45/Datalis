@@ -2,7 +2,7 @@ import docx
 import streamlit as st
 import pandas as pd
 import numpy as np
-import distutils.core
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, classification_report, confusion_matrix
@@ -18,7 +18,6 @@ import plotly.graph_objects as go
 from io import BytesIO
 from scipy.stats import zscore
 import gspread
-import os
 import pandasql as ps  # Import pandasql for SQL queries
 
 # Function to select operations for cleaning or transformation
@@ -107,8 +106,8 @@ def generate_word_report(summary, graphs, filename):
     doc.add_paragraph("Data Summary:")
     doc.add_paragraph(summary)
 
-    for fig in graphs:
-        img_filename = f"temp_{fig.layout.title.text}.png"
+    for i, fig in enumerate(graphs):
+        img_filename = f"temp_chart_{i}.png"
         fig.write_image(img_filename)
         doc.add_paragraph(fig.layout.title.text)
         doc.add_picture(img_filename, width=docx.shared.Inches(6))
@@ -130,8 +129,8 @@ def generate_pdf_report(summary, graphs, filename):
 
     # Graphs (with alignment and spacing)
     y_position = 8 * inch
-    for fig in graphs:
-        img_filename = f"temp_{fig.layout.title.text}.png"
+    for i, fig in enumerate(graphs):
+        img_filename = f"temp_chart_{i}.png"
         fig.write_image(img_filename)
         c.drawImage(img_filename, 1 * inch, y_position, width=5 * inch, height=3 * inch, preserveAspectRatio=True)
         y_position -= 4 * inch  # Adjust spacing as needed
@@ -139,13 +138,12 @@ def generate_pdf_report(summary, graphs, filename):
 
     c.save()
 
-
 # Groq AI bot - Modified for human-like responses
 def get_groq_response(user_prompt, df):
     try:
         llm = ChatGroq(
             temperature=0.7,
-            groq_api_key=os.getenv("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"),
+            groq_api_key=os.getenv("GROQ_API_KEY"), # Replace with your actual Groq API key variable name
             model_name="llama3-70b-8192"
         )
         prompt = (
@@ -274,7 +272,7 @@ def visualization_page():
         if selected_graphs:
             st.write("### Select Graphs to Include in Report")
             for i, graph in enumerate(selected_graphs):
-                if st.checkbox(f"Include {graph.layout.title.text} in report", value=True):
+                if st.checkbox(f"Include {graph.layout.title.text} in report", value=True, key=f"checkbox_{i}"):
                     if 'selected_graphs' not in st.session_state:
                         st.session_state.selected_graphs = []
                     st.session_state.selected_graphs.append(graph)
@@ -288,6 +286,11 @@ def visualization_page():
     else:
         st.warning("No data available. Please upload a CSV file.")
 
+# Page for Export Report
+@st.cache_resource
+def render_chart(_fig, _key):
+    st.plotly_chart(_fig, key=_key, use_container_width=True) 
+
 def export_report_page():
     st.header("Export Report")
     if st.session_state.df is not None:
@@ -297,12 +300,10 @@ def export_report_page():
         st.write("### Data Summary")
         st.write(summary)
 
-            st.write("### Selected Graphs for Report")
-    if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
-        for i, graph in enumerate(st.session_state.selected_graphs):
-            # Create a copy of the graph Figure to avoid duplicate IDs
-            graph_copy = go.Figure(graph) 
-            st.plotly_chart(graph_copy, key=f"chart_{i}")
+        st.write("### Selected Graphs for Report")
+        if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
+            for i, graph in enumerate(st.session_state.selected_graphs):
+                render_chart(go.Figure(graph), f"chart_{i}")
 
         st.write("### Export Options")
         
@@ -493,10 +494,6 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # Removed session state check for user
-    # if 'user' not in st.session_state:
-    #     st.session_state.user = None
-
     if 'df' not in st.session_state:
         st.session_state.df = None
 
@@ -505,10 +502,6 @@ def main():
 
     if 'summary' not in st.session_state:
         st.session_state.summary = None
-
-    # Removed login/registration check and tabs
-    # if st.session_state.user is None:
-    #     # ... (Removed login/registration code)
 
     # Directly go to app functionality 
     st.title("Datalis")
@@ -560,4 +553,5 @@ def main():
 
 if __name__ == '__main__':
     main() 
+
 
