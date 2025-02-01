@@ -288,7 +288,6 @@ def visualization_page():
     else:
         st.warning("No data available. Please upload a CSV file.")
 
-# Page for Export Report
 def export_report_page():
     st.header("Export Report")
     if st.session_state.df is not None:
@@ -301,7 +300,9 @@ def export_report_page():
         st.write("### Selected Graphs for Report")
         if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
             for graph in st.session_state.selected_graphs:
-                st.plotly_chart(graph)
+                # Create a copy of the graph Figure to avoid duplicate IDs
+                graph_copy = go.Figure(graph) 
+                st.plotly_chart(graph_copy) 
 
         st.write("### Export Options")
         
