@@ -298,12 +298,11 @@ def export_report_page():
         st.write(summary)
 
         st.write("### Selected Graphs for Report")
-        if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
-            for graph in st.session_state.selected_graphs:
-                # Create a copy of the graph Figure to avoid duplicate IDs
-                graph_copy = go.Figure(graph) 
-                st.plotly_chart(graph_copy) 
-
+    if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
+        for i, graph in enumerate(st.session_state.selected_graphs):
+            # Create a copy of the graph Figure to avoid duplicate IDs
+            graph_copy = go.Figure(graph) 
+            st.plotly_chart(graph_copy, key=f"chart_{i}")
         st.write("### Export Options")
         
         col1, col2 = st.columns(2)  # Create two columns for buttons
