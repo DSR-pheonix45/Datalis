@@ -510,7 +510,7 @@ def main():
     #     # ... (Removed login/registration code)
 
     # Directly go to app functionality 
-    st.title("Data Analyst App")
+    st.title("Datalis")
 
     st.sidebar.title("Navigation")
     if st.sidebar.button("Upload Data", key="upload_data"):
