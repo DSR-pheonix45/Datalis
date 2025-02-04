@@ -266,61 +266,90 @@ def visualization_page():
 
         chart_type = st.selectbox("Select chart type", ["Histogram", "Line Chart", "Bar Chart", 
                                                         "Scatter Plot", "Box Plot", "Donut Chart", "Heatmap"])
+        
+        # Store chart parameters in session state
+        if 'chart_params' not in st.session_state:
+            st.session_state.chart_params = {}
+        
+        if chart_type == "Histogram":
+            st.session_state.chart_params['column'] = st.selectbox("Select a column to visualize", df.columns)
+        elif chart_type == "Line Chart":
+            st.session_state.chart_params['x_column'] = st.selectbox("Select X-axis column", df.columns)
+            st.session_state.chart_params['y_column'] = st.selectbox("Select Y-axis column", df.columns)
+        elif chart_type == "Bar Chart": 
+            st.session_state.chart_params['x_column'] = st.selectbox("Select X-axis column", df.columns)
+            st.session_state.chart_params['y_column'] = st.selectbox("Select Y-axis column", df.columns)
+        elif chart_type == "Scatter Plot":
+            st.session_state.chart_params['x_column'] = st.selectbox("Select X-axis column", df.columns)
+            st.session_state.chart_params['y_column'] = st.selectbox("Select Y-axis column", df.columns)
+            st.session_state.chart_params['color_column'] = st.selectbox("Select column for color (optional)", [None] + df.columns.tolist())
+        elif chart_type == "Box Plot":
+            st.session_state.chart_params['column'] = st.selectbox("Select a column to visualize", df.columns)
+            st.session_state.chart_params['group_column'] = st.selectbox("Select column for grouping (optional)", [None] + df.columns.tolist())
+        elif chart_type == "Donut Chart":
+            st.session_state.chart_params['column'] = st.selectbox("Select a column for the donut chart", df.columns)
+        elif chart_type == "Heatmap":
+            st.session_state.chart_params['x_column'] = st.selectbox("Select X-axis column for heatmap", df.columns)
+            st.session_state.chart_params['y_column'] = st.selectbox("Select Y-axis column for heatmap", df.columns)
+            st.session_state.chart_params['z_column'] = st.selectbox("Select value column for heatmap", df.columns)
+
         selected_graphs = []
 
-        if chart_type == "Histogram":
-            column = st.selectbox("Select a column to visualize", df.columns)
-            if pd.api.types.is_numeric_dtype(df[column]):
-                fig = px.histogram(df, x=column, nbins=50, title=f"Distribution of {column}",
-                                   labels={'x': 'Value', 'y': 'Frequency'}) 
+        # Button to generate the chart
+        if st.button("Generate Chart"):
+            if chart_type == "Histogram":
+                column = st.session_state.chart_params.get('column')
+                if pd.api.types.is_numeric_dtype(df[column]):
+                    fig = px.histogram(df, x=column, nbins=50, title=f"Distribution of {column}",
+                                       labels={'x': 'Value', 'y': 'Frequency'}) 
+                    st.plotly_chart(fig)
+                    selected_graphs.append(fig)
+            elif chart_type == "Line Chart":
+                x_column = st.session_state.chart_params.get('x_column')
+                y_column = st.session_state.chart_params.get('y_column')
+                fig = px.line(df, x=x_column, y=y_column, title=f"Line Chart of {x_column} vs {y_column}", 
+                              labels={'x': x_column, 'y': y_column})
                 st.plotly_chart(fig)
                 selected_graphs.append(fig)
-        elif chart_type == "Line Chart":
-            x_column = st.selectbox("Select X-axis column", df.columns)
-            y_column = st.selectbox("Select Y-axis column", df.columns)
-            fig = px.line(df, x=x_column, y=y_column, title=f"Line Chart of {x_column} vs {y_column}", 
-                          labels={'x': x_column, 'y': y_column})
-            st.plotly_chart(fig)
-            selected_graphs.append(fig)
-        elif chart_type == "Bar Chart": 
-            x_column = st.selectbox("Select X-axis column", df.columns)
-            y_column = st.selectbox("Select Y-axis column", df.columns)
-            fig = px.bar(df, x=x_column, y=y_column, title=f"Bar Chart of {x_column} vs {y_column}",
-                         labels={'x': x_column, 'y': y_column})
-            st.plotly_chart(fig)
-            selected_graphs.append(fig)
-        elif chart_type == "Scatter Plot":
-            x_column = st.selectbox("Select X-axis column", df.columns)
-            y_column = st.selectbox("Select Y-axis column", df.columns)
-            color_column = st.selectbox("Select column for color (optional)", [None] + df.columns.tolist())
-            fig = px.scatter(df, x=x_column, y=y_column, color=color_column, 
-                             title=f"Scatter Plot of {x_column} vs {y_column}",
-                             labels={'x': x_column, 'y': y_column, 'color': color_column})
-            st.plotly_chart(fig)
-            selected_graphs.append(fig)
-        elif chart_type == "Box Plot":
-            column = st.selectbox("Select a column to visualize", df.columns)
-            if pd.api.types.is_numeric_dtype(df[column]):
-                group_column = st.selectbox("Select column for grouping (optional)", [None] + df.columns.tolist())
-                fig = px.box(df, y=column, color=group_column, title=f"Box Plot of {column}",
-                             labels={'y': column, 'color': group_column})
+            elif chart_type == "Bar Chart": 
+                x_column = st.session_state.chart_params.get('x_column')
+                y_column = st.session_state.chart_params.get('y_column')
+                fig = px.bar(df, x=x_column, y=y_column, title=f"Bar Chart of {x_column} vs {y_column}",
+                             labels={'x': x_column, 'y': y_column})
                 st.plotly_chart(fig)
                 selected_graphs.append(fig)
-        elif chart_type == "Donut Chart":
-            column = st.selectbox("Select a column for the donut chart", df.columns)
-            fig = px.pie(df, names=column, title=f"Donut Chart of {column}", hole=0.4,
-                         labels={'names': column})
-            st.plotly_chart(fig)
-            selected_graphs.append(fig)
-        elif chart_type == "Heatmap":
-            x_column = st.selectbox("Select X-axis column for heatmap", df.columns)
-            y_column = st.selectbox("Select Y-axis column for heatmap", df.columns)
-            z_column = st.selectbox("Select value column for heatmap", df.columns)
-            fig = px.imshow(df.pivot(index=y_column, columns=x_column, values=z_column), 
-                            title=f"Heatmap of {z_column} by {x_column} and {y_column}",
-                            labels=dict(x=x_column, y=y_column, color=z_column))
-            st.plotly_chart(fig)
-            selected_graphs.append(fig)
+            elif chart_type == "Scatter Plot":
+                x_column = st.session_state.chart_params.get('x_column')
+                y_column = st.session_state.chart_params.get('y_column')
+                color_column = st.session_state.chart_params.get('color_column')
+                fig = px.scatter(df, x=x_column, y=y_column, color=color_column, 
+                                 title=f"Scatter Plot of {x_column} vs {y_column}",
+                                 labels={'x': x_column, 'y': y_column, 'color': color_column})
+                st.plotly_chart(fig)
+                selected_graphs.append(fig)
+            elif chart_type == "Box Plot":
+                column = st.session_state.chart_params.get('column')
+                group_column = st.session_state.chart_params.get('group_column')
+                if pd.api.types.is_numeric_dtype(df[column]):
+                    fig = px.box(df, y=column, color=group_column, title=f"Box Plot of {column}",
+                                 labels={'y': column, 'color': group_column})
+                    st.plotly_chart(fig)
+                    selected_graphs.append(fig)
+            elif chart_type == "Donut Chart":
+                column = st.session_state.chart_params.get('column')
+                fig = px.pie(df, names=column, title=f"Donut Chart of {column}", hole=0.4,
+                             labels={'names': column})
+                st.plotly_chart(fig)
+                selected_graphs.append(fig)
+            elif chart_type == "Heatmap":
+                x_column = st.session_state.chart_params.get('x_column')
+                y_column = st.session_state.chart_params.get('y_column')
+                z_column = st.session_state.chart_params.get('z_column')
+                fig = px.imshow(df.pivot(index=y_column, columns=x_column, values=z_column), 
+                                title=f"Heatmap of {z_column} by {x_column} and {y_column}",
+                                labels=dict(x=x_column, y=y_column, color=z_column))
+                st.plotly_chart(fig)
+                selected_graphs.append(fig)
 
         if selected_graphs:
             st.write("### Select Graphs to Include in Report")
