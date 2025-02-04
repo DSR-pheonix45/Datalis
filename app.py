@@ -143,7 +143,7 @@ def get_groq_response(user_prompt, df):
     try:
         llm = ChatGroq(
             temperature=0.7,
-            max_completion_tokens=25000,
+            max_completion_tokens=7500,
             groq_api_key=os.getenv("GROQ_API_KEY"), # Replace with your actual Groq API key variable name
             model_name="llama-3.1-8b-instant"
         )
