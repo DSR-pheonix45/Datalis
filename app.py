@@ -149,9 +149,9 @@ def get_groq_response(user_prompt, df):
         )
         prompt = (
             f"The dataset has these columns: {df.columns.tolist()}. "
-            f"Here's a sneak peek (first 5 rows):\n{df.head().to_string()}\n\n"
+            f"Here's a sneak peek (All rows):\n{df.all().to_string()}\n\n"
             f"Someone asked: {user_prompt}\n\n"
-            "Please give me some insights or suggestions about the data in a friendly and helpful way. Don't use any code in your answer."
+            "Please give me some insights or suggestions about the data in a friendly and helpful way Also highlight the Data points. Don't use any code in your answer."
         )
         response = llm.invoke(prompt)
         return response.content
