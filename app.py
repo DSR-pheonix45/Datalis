@@ -429,137 +429,115 @@ def main():
     st.markdown(
         """
         <style>
-        /* General Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
-            color: #2c3e50;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f8f8; 
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6; 
+}
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+.container { 
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff; 
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); 
+    border-radius: 8px;
+}
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 60px 0;
-            text-align: center;
-            color: #ffffff;
-        }
+header { 
+    background: linear-gradient(135deg, #667eea, #764ba2); 
+    padding: 30px 0; 
+    text-align: center;
+    color: white; 
+}
 
-        header h1 {
-            font-size: 2.5rem;
-            margin: 0;
-        }
+header h1 { 
+    font-size: 2rem; 
+    margin-bottom: 0.5rem;
+}
 
-        header p {
-            font-size: 1.2rem;
-            margin: 10px 0 0;
-        }
+/* Button Styling */
+.stButton>button { 
+    background-color: #80d8ff; /* Light Aqua Blue */ 
+    color: white;
+    border: none;
+    padding: 10px 20px; 
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease; 
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); 
+}
 
-        /* Login and Register Containers */
-        .login-container, .register-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin: 20px auto;
-            max-width: 400px;
-        }
+.stButton>button:hover {
+    background-color: #4db6ac;  /* Slightly Darker Aqua Blue */
+    cursor: pointer; 
+}
 
-        .stButton button {
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
+/* Input Fields & Text Areas */
+.stTextInput input, 
+.stTextInput textarea { 
+    border: 1px solid #ddd; 
+    border-radius: 5px;
+    padding: 10px;
+    width: calc(100% - 22px);  
+    font-size: 1rem; 
+    box-sizing: border-box;
+}
 
-        .stButton button:hover {
-            background-color: #45a049;
-        }
+.stTextInput input:focus, 
+.stTextInput textarea:focus {
+    outline: none; 
+    border-color: #4CAF50;  
+    box-shadow: 0px 0px 5px rgba(76, 175, 80, 0.3); 
+}
 
-        .stTextInput input, .stTextInput textarea {
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            color: #333;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
+/* Sidebar Styles - Enhanced Matte Look */
+.sidebar .sidebar-content {
+    background-color: #f0f2f6; 
+    padding: 20px;
+    border-radius: 8px;
+}
 
-        .stTextInput input:focus, .stTextInput textarea:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
+.sidebar .stButton>button { 
+    background-color: #e7e7e7; 
+    color: #333;
+    border: none;
+    padding: 10px 15px;
+    width: 100%;
+    margin-bottom: 10px; 
+    text-align: left; 
+    border-radius: 5px;
+    transition: all 0.3s ease; 
+}
 
-        /* Footer */
-        footer {
-            background: #2c3e50;
-            padding: 20px 0;
-            text-align: center;
-            color: #ffffff;
-            margin-top: 40px;
-        }
+.sidebar .stButton>button:hover { 
+    background-color: #d4d4d4; 
+}
 
-        footer p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
+.sidebar .stButton>button:before { 
+    font-family: "Font Awesome 5 Free"; 
+    margin-right: 10px;  
+    display: inline-block;
+    vertical-align: middle; 
+}
 
-        /* Sidebar Styles */
-        .sidebar .sidebar-content {
-            background-color: #f0f2f6; /* Light gray matte background */
-            padding: 20px; 
-            border-radius: 10px; /* Rounded corners for sleekness */
-        }
+.sidebar .stButton[data-testid="upload_data"]>button:before {
+    content: "\f093"; 
+}
 
-        .sidebar .stButton>button {
-            background-color: #e7e7e7; /* Light gray button background */
-            color: #333; 
-            border: 1px solid #ccc; /* Subtle border */
-            border-radius: 5px;
-            padding: 10px 15px; 
-            width: 100%; /* Full width buttons */
-            margin-bottom: 10px;
-            transition: background-color 0.3s ease; /* Smooth transition on hover */
-        }
-
-        .sidebar .stButton>button:hover {
-            background-color: #d4d4d4; /* Slightly darker gray on hover */
-        }
-
-        /* Add icons to buttons (using a web icon library like Font Awesome) */
-        .sidebar .stButton>button:before { 
-            font-family: "Font Awesome 5 Free"; 
-            margin-right: 10px;  
-            display: inline-block;
-            vertical-align: middle; /* For proper icon alignment */
-        }
-
-        .sidebar .stButton[data-baseweb="button"] {
-            width: auto;
-        }
-
-        /* Example icon for "Upload Data" button - adjust as needed */
-        .sidebar .stButton[data-testid="upload_data"]>button:before { 
-            content: "\f093"; /* Font Awesome upload icon code */
-        }
-
-        /* Add more icon styles for other buttons similarly */ 
-        </style>
+/* Footer - Optional, if used */
+footer {
+    background: #2c3e50; 
+    padding: 20px 0;
+    text-align: center;
+    color: white;
+    margin-top: 40px; 
+}
+</style> 
         """,
         unsafe_allow_html=True,
     )
@@ -623,6 +601,7 @@ def main():
 
 if __name__ == '__main__':
     main() 
+
 
 
 
