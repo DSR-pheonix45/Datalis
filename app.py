@@ -315,6 +315,43 @@ def visualization_page():
     else:
         st.warning("No data available. Please upload a CSV file.")
 
+
+# Page for SQL Query and DataFrame Editing
+def sql_query_page():
+    st.header("SQL Query and DataFrame Editing")
+    
+    if st.session_state.df is not None:
+        st.write("### Data Preview")
+        
+        # Toggle button for editing
+        edit_mode = st.checkbox("Enable Editing", value=False)
+        
+        if edit_mode:
+            # Display editable DataFrame
+            edited_df = st.data_editor(st.session_state.df, height=300, use_container_width=True)
+            # Update the session state with the edited DataFrame
+            st.session_state.df = edited_df
+        else:
+            # Display non-editable DataFrame
+            st.dataframe(st.session_state.df, height=300, use_container_width=True)
+
+        # SQL Query Input
+        st.write("### Enter Your SQL Query:")
+        st.markdown("**Demo Query (shows all data):**  `SELECT * FROM data`")
+        sql_query = st.text_area("", value="SELECT * FROM data", height=100)
+        
+        if st.button("Execute SQL Query"):
+            try:
+                # Execute SQL query on the DataFrame
+                result_df = ps.sqldf(sql_query, {"data": st.session_state.df})
+                st.write("### Query Results")
+                st.dataframe(result_df, height=300, use_container_width=True)
+            except Exception as e:
+                st.error(f"Error executing query: {e}")
+
+    else:
+        st.warning("No data available. Please upload a CSV file.")
+
 # Page for Export Report
 @st.cache_resource
 def render_chart(_fig, _key):
@@ -365,42 +402,6 @@ def export_report_page():
                             mime="application/pdf"
                         )
                     st.success("PDF report generated successfully!")
-    else:
-        st.warning("No data available. Please upload a CSV file.")
-
-# Page for SQL Query and DataFrame Editing
-def sql_query_page():
-    st.header("SQL Query and DataFrame Editing")
-    
-    if st.session_state.df is not None:
-        st.write("### Data Preview")
-        
-        # Toggle button for editing
-        edit_mode = st.checkbox("Enable Editing", value=False)
-        
-        if edit_mode:
-            # Display editable DataFrame
-            edited_df = st.data_editor(st.session_state.df, height=300, use_container_width=True)
-            # Update the session state with the edited DataFrame
-            st.session_state.df = edited_df
-        else:
-            # Display non-editable DataFrame
-            st.dataframe(st.session_state.df, height=300, use_container_width=True)
-
-        # SQL Query Input
-        st.write("### Enter Your SQL Query:")
-        st.markdown("**Demo Query (shows all data):**  `SELECT * FROM data`")
-        sql_query = st.text_area("", value="SELECT * FROM data", height=100)
-        
-        if st.button("Execute SQL Query"):
-            try:
-                # Execute SQL query on the DataFrame
-                result_df = ps.sqldf(sql_query, {"data": st.session_state.df})
-                st.write("### Query Results")
-                st.dataframe(result_df, height=300, use_container_width=True)
-            except Exception as e:
-                st.error(f"Error executing query: {e}")
-
     else:
         st.warning("No data available. Please upload a CSV file.")
 
@@ -462,7 +463,7 @@ header h1 {
 
 /* Button Styling */
 .stButton>button { 
-    background-color: #80d8ff; /* Light Aqua Blue */ 
+    background-color: #4CAF50; /* Green */ 
     color: white;
     border: none;
     padding: 10px 20px; 
@@ -473,7 +474,7 @@ header h1 {
 }
 
 .stButton>button:hover {
-    background-color: #4db6ac;  /* Slightly Darker Aqua Blue */
+    background-color: #45a049;  /* Slightly Darker Green */
     cursor: pointer; 
 }
 
@@ -497,7 +498,7 @@ header h1 {
 
 /* Sidebar Styles - Enhanced Matte Look */
 .sidebar .sidebar-content {
-    background-color: #f0f2f6; 
+    background-color: #4d4d4d; /* Darker Gray */
     padding: 20px;
     border-radius: 8px;
 }
@@ -565,10 +566,10 @@ footer {
         st.session_state.page = "Data Visualization"
     if st.sidebar.button("AI Chat Platform", key="ai_chat_platform"):
         st.session_state.page = "AI Chat Platform"
-    if st.sidebar.button("Export Report", key="export_report"):
-        st.session_state.page = "Export Report"
     if st.sidebar.button("SQL Query and Edit DataFrame", key="sql_query"):
         st.session_state.page = "SQL Query and Edit DataFrame"
+    if st.sidebar.button("Export Report", key="export_report"):
+        st.session_state.page = "Export Report"
 
     if 'page' not in st.session_state:
         st.session_state.page = "Upload Data"
@@ -593,15 +594,11 @@ footer {
     elif st.session_state.page == "AI Chat Platform":
         ai_chat_page()
 
-    elif st.session_state.page == "Export Report":
-        export_report_page()
-
     elif st.session_state.page == "SQL Query and Edit DataFrame":
         sql_query_page()
 
+    elif st.session_state.page == "Export Report":
+        export_report_page()
+
 if __name__ == '__main__':
     main() 
-
-
-
-
