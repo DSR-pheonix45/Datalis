@@ -9,6 +9,7 @@ joblib
 pandasql
 scipy
 gspread
+openpyxl
 scikit-learn
 # Add these to handle distutils issue
 setuptools==67.6.0   
