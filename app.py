@@ -645,10 +645,14 @@ def main():
     if 'page' not in st.session_state:
         st.session_state.page = "Upload Data"
 
-    if st.session_state.page == "Upload Data":
-        uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+       if st.session_state.page == "Upload Data":
+        uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx", "xls"])
         if uploaded_file is not None:
-            st.session_state.df = pd.read_csv(uploaded_file)
+            if uploaded_file.type == "text/csv":
+                st.session_state.df = pd.read_csv(uploaded_file)
+            elif uploaded_file.type in ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]:
+                st.session_state.df = pd.read_excel(uploaded_file)
+            
             st.session_state.uploaded_file = uploaded_file
             st.write("### Data Preview")
             st.dataframe(st.session_state.df, height=300, use_container_width=True)
