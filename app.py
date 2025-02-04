@@ -139,8 +139,6 @@ def generate_pdf_report(summary, graphs, filename):
     c.save()
 
 # Groq AI bot - Modified for human-like responses
-import os
-from langchain.chat_models import ChatGroq
 
 def get_groq_response(user_prompt, df, data_scope="full"):
     try:
