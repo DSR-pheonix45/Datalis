@@ -139,24 +139,49 @@ def generate_pdf_report(summary, graphs, filename):
     c.save()
 
 # Groq AI bot - Modified for human-like responses
-def get_groq_response(user_prompt, df):
+def get_groq_response(user_prompt, df, data_scope="full"):
     try:
         llm = ChatGroq(
             temperature=0.7,
             max_completion_tokens=7500,
-            groq_api_key=os.getenv("GROQ_API_KEY"), # Replace with your actual Groq API key variable name
-            model_name="llama-3.1-8b-instant"
+            groq_api_key=os.getenv("GROQ_API_KEY"),
+            model_name="llama-3.2-3b-preview"
         )
+
+        total_rows = len(df)
+        if total_rows > 500:
+            disclaimer = (
+                "⚠️ Your dataset is large (more than 500 rows). "
+                "Would you like insights from:\n"
+                "1️⃣ Entire dataset\n"
+                "2️⃣ First half\n"
+                "3️⃣ Last half\n\n"
+                "By default, analyzing the full dataset."
+            )
+            print(disclaimer)  # Log disclaimer for user awareness
+
+        # Select data scope based on user choice
+        if data_scope == "first_half":
+            df = df.iloc[: total_rows // 2]
+        elif data_scope == "last_half":
+            df = df.iloc[total_rows // 2 :]
+
         prompt = (
-            f"The dataset has these columns: {df.columns.tolist()}. "
-            f"Here's a sneak peek (All rows):\n{df.all().to_string()}\n\n"
-            f"Someone asked: {user_prompt}\n\n"
-            "Please give me some insights or suggestions about the data in a friendly and helpful way Also highlight the Data points. Don't use any code in your answer."
+            f"The dataset has these columns: {df.columns.tolist()}.\n\n"
+            f"Here's a sneak peek ({len(df)} rows considered):\n{df.to_string(index=False)}\n\n"
+            f"User Query: {user_prompt}\n\n"
+            "Provide a response that is 90% inclined to the dataset and 10% creatively related to the domain of the data.\n"
+            "Give crisp, data-driven insights like a professional data analyst. Highlight key data points.\n"
+            "Avoid any code in the response."
         )
+
         response = llm.invoke(prompt)
         return response.content
+
     except Exception as e:
-        return f"Oops, something went wrong! Error: {str(e)}" 
+        if "tokens" in str(e).lower():  # Token exhaustion check
+            return "🚨 Token limit reached! Subscribe to premium for unlimited insights."
+        return f"❌ Error: {str(e)}"
 
 # Page for Data Cleaning
 def cleaning_page():
