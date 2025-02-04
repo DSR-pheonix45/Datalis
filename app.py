@@ -143,8 +143,9 @@ def get_groq_response(user_prompt, df):
     try:
         llm = ChatGroq(
             temperature=0.7,
+            max_completion_tokens=25000,
             groq_api_key=os.getenv("GROQ_API_KEY"), # Replace with your actual Groq API key variable name
-            model_name="llama3-70b-8192"
+            model_name="deepseek-r1-distill-llama-70b"
         )
         prompt = (
             f"The dataset has these columns: {df.columns.tolist()}. "
