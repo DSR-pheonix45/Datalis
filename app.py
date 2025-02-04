@@ -220,7 +220,7 @@ def cleaning_page():
                 mime="text/csv"
             )
     else:
-        st.warning("No data available. Please upload a CSV file.")
+        st.warning("No data available. Please upload a CSV or Excel file.")
 
 # Page for Data Transformation
 def transformation_page():
@@ -256,7 +256,7 @@ def transformation_page():
                 mime="text/csv"
             )
     else:
-        st.warning("No data available. Please upload a CSV file.")
+        st.warning("No data available. Please upload a CSV or Excel file.")
 
 # Page for Visualization
 def visualization_page():
@@ -366,7 +366,7 @@ def visualization_page():
                 st.success("Data summary generated!")
 
     else:
-        st.warning("No data available. Please upload a CSV file.")
+        st.warning("No data available. Please upload a CSV or Excel file.")
 
 
 # Page for SQL Query and DataFrame Editing
@@ -403,7 +403,7 @@ def sql_query_page():
                 st.error(f"Error executing query: {e}")
 
     else:
-        st.warning("No data available. Please upload a CSV file.")
+        st.warning("No data available. Please upload a CSV or Excel file.")
 
 # Page for Export Report
 @st.cache_resource
@@ -456,7 +456,7 @@ def export_report_page():
                         )
                     st.success("PDF report generated successfully!")
     else:
-        st.warning("No data available. Please upload a CSV file.")
+        st.warning("No data available. Please upload a CSV or Excel file.")
 
 # Page for AI Chat Platform
 def ai_chat_page():
@@ -579,6 +579,9 @@ def main():
             vertical-align: middle; 
         }
 
+        /* Font Awesome Icons for Sidebar */
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> 
+
         .sidebar .stButton[data-testid="upload_data"]>button:before {
            content: "\f093"; /* Upload Icon */
         }
@@ -645,7 +648,7 @@ def main():
     if 'page' not in st.session_state:
         st.session_state.page = "Upload Data"
 
-       if st.session_state.page == "Upload Data":
+    if st.session_state.page == "Upload Data":
         uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx", "xls"])
         if uploaded_file is not None:
             if uploaded_file.type == "text/csv":
@@ -677,4 +680,5 @@ def main():
 
 if __name__ == '__main__':
     main() 
+
 
