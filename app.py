@@ -264,39 +264,63 @@ def visualization_page():
     if st.session_state.df is not None:
         df = st.session_state.df
 
-        chart_type = st.selectbox("Select chart type", ["Histogram", "Line Chart", "Bar Chart", "Scatter Plot", "Box Plot"])
+        chart_type = st.selectbox("Select chart type", ["Histogram", "Line Chart", "Bar Chart", 
+                                                        "Scatter Plot", "Box Plot", "Donut Chart", "Heatmap"])
         selected_graphs = []
 
         if chart_type == "Histogram":
             column = st.selectbox("Select a column to visualize", df.columns)
             if pd.api.types.is_numeric_dtype(df[column]):
-                fig = px.histogram(df, x=column, nbins=50, title=f"Distribution of {column}")
+                fig = px.histogram(df, x=column, nbins=50, title=f"Distribution of {column}",
+                                   labels={'x': 'Value', 'y': 'Frequency'}) 
                 st.plotly_chart(fig)
                 selected_graphs.append(fig)
         elif chart_type == "Line Chart":
             x_column = st.selectbox("Select X-axis column", df.columns)
             y_column = st.selectbox("Select Y-axis column", df.columns)
-            fig = px.line(df, x=x_column, y=y_column, title=f"Line Chart of {x_column} vs {y_column}")
+            fig = px.line(df, x=x_column, y=y_column, title=f"Line Chart of {x_column} vs {y_column}", 
+                          labels={'x': x_column, 'y': y_column})
             st.plotly_chart(fig)
             selected_graphs.append(fig)
         elif chart_type == "Bar Chart": 
             x_column = st.selectbox("Select X-axis column", df.columns)
             y_column = st.selectbox("Select Y-axis column", df.columns)
-            fig = px.bar(df, x=x_column, y=y_column, title=f"Bar Chart of {x_column} vs {y_column}")
+            fig = px.bar(df, x=x_column, y=y_column, title=f"Bar Chart of {x_column} vs {y_column}",
+                         labels={'x': x_column, 'y': y_column})
             st.plotly_chart(fig)
             selected_graphs.append(fig)
         elif chart_type == "Scatter Plot":
             x_column = st.selectbox("Select X-axis column", df.columns)
             y_column = st.selectbox("Select Y-axis column", df.columns)
-            fig = px.scatter(df, x=x_column, y=y_column, title=f"Scatter Plot of {x_column} vs {y_column}")
+            color_column = st.selectbox("Select column for color (optional)", [None] + df.columns.tolist())
+            fig = px.scatter(df, x=x_column, y=y_column, color=color_column, 
+                             title=f"Scatter Plot of {x_column} vs {y_column}",
+                             labels={'x': x_column, 'y': y_column, 'color': color_column})
             st.plotly_chart(fig)
             selected_graphs.append(fig)
         elif chart_type == "Box Plot":
             column = st.selectbox("Select a column to visualize", df.columns)
             if pd.api.types.is_numeric_dtype(df[column]):
-                fig = px.box(df, y=column, title=f"Box Plot of {column}")
+                group_column = st.selectbox("Select column for grouping (optional)", [None] + df.columns.tolist())
+                fig = px.box(df, y=column, color=group_column, title=f"Box Plot of {column}",
+                             labels={'y': column, 'color': group_column})
                 st.plotly_chart(fig)
                 selected_graphs.append(fig)
+        elif chart_type == "Donut Chart":
+            column = st.selectbox("Select a column for the donut chart", df.columns)
+            fig = px.pie(df, names=column, title=f"Donut Chart of {column}", hole=0.4,
+                         labels={'names': column})
+            st.plotly_chart(fig)
+            selected_graphs.append(fig)
+        elif chart_type == "Heatmap":
+            x_column = st.selectbox("Select X-axis column for heatmap", df.columns)
+            y_column = st.selectbox("Select Y-axis column for heatmap", df.columns)
+            z_column = st.selectbox("Select value column for heatmap", df.columns)
+            fig = px.imshow(df.pivot(index=y_column, columns=x_column, values=z_column), 
+                            title=f"Heatmap of {z_column} by {x_column} and {y_column}",
+                            labels=dict(x=x_column, y=y_column, color=z_column))
+            st.plotly_chart(fig)
+            selected_graphs.append(fig)
 
         if selected_graphs:
             st.write("### Select Graphs to Include in Report")
@@ -430,115 +454,133 @@ def main():
     st.markdown(
         """
         <style>
-/* General Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f8f8; 
-    color: #333;
-    margin: 0;
-    padding: 0;
-    line-height: 1.6; 
-}
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f8f8; 
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6; 
+        }
 
-.container { 
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff; 
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); 
-    border-radius: 8px;
-}
+        .container { 
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff; 
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); 
+            border-radius: 8px;
+        }
 
-header { 
-    background: linear-gradient(135deg, #667eea, #764ba2); 
-    padding: 30px 0; 
-    text-align: center;
-    color: white; 
-}
+        header { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            padding: 30px 0; 
+            text-align: center;
+            color: white; 
+        }
 
-header h1 { 
-    font-size: 2rem; 
-    margin-bottom: 0.5rem;
-}
+        header h1 { 
+            font-size: 2rem; 
+            margin-bottom: 0.5rem;
+        }
 
-/* Button Styling */
-.stButton>button { 
-    background-color: #4CAF50; /* Green */ 
-    color: white;
-    border: none;
-    padding: 10px 20px; 
-    font-size: 1rem;
-    border-radius: 5px;
-    transition: background-color 0.3s ease; 
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); 
-}
+        /* Button Styling */
+        .stButton>button { 
+            background-color: #4CAF50; /* Green */ 
+            color: white;
+            border: none;
+            padding: 10px 20px; 
+            font-size: 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease; 
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); 
+        }
 
-.stButton>button:hover {
-    background-color: #45a049;  /* Slightly Darker Green */
-    cursor: pointer; 
-}
+        .stButton>button:hover {
+            background-color: #45a049;  /* Slightly Darker Green */
+            cursor: pointer; 
+        }
 
-/* Input Fields & Text Areas */
-.stTextInput input, 
-.stTextInput textarea { 
-    border: 1px solid #ddd; 
-    border-radius: 5px;
-    padding: 10px;
-    width: calc(100% - 22px);  
-    font-size: 1rem; 
-    box-sizing: border-box;
-}
+        /* Input Fields & Text Areas */
+        .stTextInput input, 
+        .stTextInput textarea { 
+            border: 1px solid #ddd; 
+            border-radius: 5px;
+            padding: 10px;
+            width: calc(100% - 22px);  
+            font-size: 1rem; 
+            box-sizing: border-box;
+        }
 
-.stTextInput input:focus, 
-.stTextInput textarea:focus {
-    outline: none; 
-    border-color: #4CAF50;  
-    box-shadow: 0px 0px 5px rgba(76, 175, 80, 0.3); 
-}
+        .stTextInput input:focus, 
+        .stTextInput textarea:focus {
+            outline: none; 
+            border-color: #4CAF50;  
+            box-shadow: 0px 0px 5px rgba(76, 175, 80, 0.3); 
+        }
 
-/* Sidebar Styles - Enhanced Matte Look */
-.sidebar .sidebar-content {
-    background-color: #4d4d4d; /* Darker Gray */
-    padding: 20px;
-    border-radius: 8px;
-}
+        /* Sidebar Styles - Enhanced Matte Look */
+        .sidebar .sidebar-content {
+            background-color: #4d4d4d; /* Darker Gray */
+            padding: 20px;
+            border-radius: 8px;
+        }
 
-.sidebar .stButton>button { 
-    background-color: #e7e7e7; 
-    color: #333;
-    border: none;
-    padding: 10px 15px;
-    width: 100%;
-    margin-bottom: 10px; 
-    text-align: left; 
-    border-radius: 5px;
-    transition: all 0.3s ease; 
-}
+        .sidebar .stButton>button { 
+            background-color: #e7e7e7; 
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            width: 100%;
+            margin-bottom: 10px; 
+            text-align: left; 
+            border-radius: 5px;
+            transition: all 0.3s ease; 
+        }
 
-.sidebar .stButton>button:hover { 
-    background-color: #d4d4d4; 
-}
+        .sidebar .stButton>button:hover { 
+            background-color: #d4d4d4; 
+        }
 
-.sidebar .stButton>button:before { 
-    font-family: "Font Awesome 5 Free"; 
-    margin-right: 10px;  
-    display: inline-block;
-    vertical-align: middle; 
-}
+        .sidebar .stButton>button:before { 
+            font-family: "Font Awesome 5 Free"; 
+            margin-right: 10px;  
+            display: inline-block;
+            vertical-align: middle; 
+        }
 
-.sidebar .stButton[data-testid="upload_data"]>button:before {
-    content: "\f093"; 
-}
+        .sidebar .stButton[data-testid="upload_data"]>button:before {
+           content: "\f093"; /* Upload Icon */
+        }
+        .sidebar .stButton[data-testid="data_cleaning"]>button:before {
+           content: "\f1ea"; /* Broom (Cleaning) Icon */
+        }
+        .sidebar .stButton[data-testid="data_transformation"]>button:before {
+           content: "\f0ec"; /* Exchange (Transformation) Icon */
+        }
+        .sidebar .stButton[data-testid="data_visualization"]>button:before {
+           content: "\f57d"; /* Chart Bar Icon */
+        } 
+        .sidebar .stButton[data-testid="ai_chat_platform"]>button:before {
+           content: "\f086"; /* Comment Dots Icon */
+        } 
+        .sidebar .stButton[data-testid="sql_query"]>button:before {
+           content: "\f1c0"; /* Database Icon */
+        } 
+        .sidebar .stButton[data-testid="export_report"]>button:before {
+           content: "\f019"; /* Download Icon */
+        }
 
-/* Footer - Optional, if used */
-footer {
-    background: #2c3e50; 
-    padding: 20px 0;
-    text-align: center;
-    color: white;
-    margin-top: 40px; 
-}
-</style> 
+        /* Footer - Optional, if used */
+        footer {
+            background: #2c3e50; 
+            padding: 20px 0;
+            text-align: center;
+            color: white;
+            margin-top: 40px; 
+        }
+        </style> 
         """,
         unsafe_allow_html=True,
     )
@@ -602,3 +644,4 @@ footer {
 
 if __name__ == '__main__':
     main() 
+
