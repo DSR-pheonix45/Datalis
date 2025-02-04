@@ -139,6 +139,9 @@ def generate_pdf_report(summary, graphs, filename):
     c.save()
 
 # Groq AI bot - Modified for human-like responses
+import os
+from langchain.chat_models import ChatGroq
+
 def get_groq_response(user_prompt, df, data_scope="full"):
     try:
         llm = ChatGroq(
@@ -170,8 +173,9 @@ def get_groq_response(user_prompt, df, data_scope="full"):
             f"The dataset has these columns: {df.columns.tolist()}.\n\n"
             f"Here's a sneak peek ({len(df)} rows considered):\n{df.to_string(index=False)}\n\n"
             f"User Query: {user_prompt}\n\n"
-            "Provide a response that is 90% inclined to the dataset and 10% creatively related to the domain of the data.\n"
-            "Give crisp, data-driven insights like a professional data analyst. Highlight key data points.\n"
+            "Provide a **one-statement summary** first, then list key **highlighted data points** before diving into detailed insights.\n"
+            "Ensure the response is 90% based on the dataset and 10% creatively related to its domain.\n"
+            "Give crisp, data-driven insights like a professional data analyst.\n"
             "Avoid any code in the response."
         )
 
@@ -182,6 +186,7 @@ def get_groq_response(user_prompt, df, data_scope="full"):
         if "tokens" in str(e).lower():  # Token exhaustion check
             return "🚨 Token limit reached! Subscribe to premium for unlimited insights."
         return f"❌ Error: {str(e)}"
+
 
 # Page for Data Cleaning
 def cleaning_page():
@@ -408,13 +413,13 @@ def ai_chat_page():
     if st.session_state.df is not None:
         st.success(f"Uploaded File: {st.session_state.uploaded_file.name}")
         st.write("### Data Preview")
-        st.dataframe(st.session_state.df.head(), height=200, use_container_width=True)
+        st.dataframe(st.session_state.df.head(20), height=200, use_container_width=True)
 
-    user_query = st.text_input("Ask the AI Assistant anything about the data:", key="user_query")
+    user_query = st.text_input("Ask the Dabby anything about the data:", key="user_query")
     
     if st.button("Send") or (user_query and st.session_state.get("enter_pressed", False)):
         response = get_groq_response(user_query, st.session_state.df)
-        st.write("### AI Response")
+        st.write("### Datalis Dabby Suggests")
         st.write(response)
         st.session_state["enter_pressed"] = False
 
