@@ -518,6 +518,47 @@ def main():
             margin: 0;
             font-size: 0.9rem;
         }
+
+        /* Sidebar Styles */
+        .sidebar .sidebar-content {
+            background-color: #f0f2f6; /* Light gray matte background */
+            padding: 20px; 
+            border-radius: 10px; /* Rounded corners for sleekness */
+        }
+
+        .sidebar .stButton>button {
+            background-color: #e7e7e7; /* Light gray button background */
+            color: #333; 
+            border: 1px solid #ccc; /* Subtle border */
+            border-radius: 5px;
+            padding: 10px 15px; 
+            width: 100%; /* Full width buttons */
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease; /* Smooth transition on hover */
+        }
+
+        .sidebar .stButton>button:hover {
+            background-color: #d4d4d4; /* Slightly darker gray on hover */
+        }
+
+        /* Add icons to buttons (using a web icon library like Font Awesome) */
+        .sidebar .stButton>button:before { 
+            font-family: "Font Awesome 5 Free"; 
+            margin-right: 10px;  
+            display: inline-block;
+            vertical-align: middle; /* For proper icon alignment */
+        }
+
+        .sidebar .stButton[data-baseweb="button"] {
+            width: auto;
+        }
+
+        /* Example icon for "Upload Data" button - adjust as needed */
+        .sidebar .stButton[data-testid="upload_data"]>button:before { 
+            content: "\f093"; /* Font Awesome upload icon code */
+        }
+
+        /* Add more icon styles for other buttons similarly */ 
         </style>
         """,
         unsafe_allow_html=True,
@@ -582,5 +623,6 @@ def main():
 
 if __name__ == '__main__':
     main() 
+
 
 
