@@ -144,7 +144,6 @@ def get_groq_response(user_prompt, df, data_scope="full"):
     try:
         llm = ChatGroq(
             temperature=0.7,
-            max_completion_tokens=7500,
             groq_api_key=os.getenv("GROQ_API_KEY"),
             model_name="llama-3.2-3b-preview"
         )
