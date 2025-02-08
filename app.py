@@ -1,4 +1,3 @@
-import docx
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,7 +17,66 @@ import plotly.graph_objects as go
 from io import BytesIO
 from scipy.stats import zscore
 import gspread
-import pandasql as ps  # Import pandasql for SQL queries
+import pandasql as ps
+
+def display_intro():
+    st.title("Welcome to Datalis")
+    st.markdown("""
+    **Datalis** is a comprehensive data analysis tool designed to help you clean, transform, visualize, and gain insights from your data efficiently. Here's a quick guide on how to navigate through the app:
+
+    - **Upload Data**: Start by uploading your CSV or Excel files. You can drag and drop multiple files, which will be organized into folders for easy access.
+    - **Data Cleaning**: Use this section to handle missing values, remove duplicates, and perform other cleaning operations on your dataset.
+    - **Data Transformation**: Transform your data by renaming columns, converting data types, and more.
+    - **Data Visualization**: Create various types of charts to visualize your data, including histograms, line charts, and scatter plots.
+    - **AI Chat Platform**: Interact with our AI to get insights and answers about your data.
+    - **SQL Query and Edit DataFrame**: Execute SQL queries on your data and edit DataFrames directly.
+    - **Export Report**: Generate and download reports in Word or PDF format based on your analysis.
+
+    Navigate through these sections using the sidebar on the left. Let's get started by uploading your data!
+    """)
+
+def upload_files():
+    display_intro()
+    st.header("Upload Data")
+    uploaded_files = st.file_uploader("Drag and drop CSV or Excel files here", type=["csv", "xlsx", "xls"], accept_multiple_files=True)
+
+    if uploaded_files:
+        upload_dir = "uploaded_files"
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+
+        for uploaded_file in uploaded_files:
+            file_path = os.path.join(upload_dir, uploaded_file.name)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success(f"Uploaded {uploaded_file.name}")
+
+        st.write("### Uploaded Files")
+        uploaded_file_names = os.listdir(upload_dir)
+        selected_file = st.selectbox("Select a file for operations", uploaded_file_names)
+
+        if selected_file:
+            file_path = os.path.join(upload_dir, selected_file)
+            if selected_file.endswith(".csv"):
+                st.session_state.df = pd.read_csv(file_path)
+            elif selected_file.endswith((".xlsx", ".xls")):
+                st.session_state.df = pd.read_excel(file_path)
+
+            st.session_state.uploaded_file = selected_file
+            st.write("### Data Preview")
+            st.dataframe(st.session_state.df, height=300, use_container_width=True)
+
+def select_file():
+    uploaded_file_names = os.listdir("uploaded_files")
+    selected_file = st.selectbox("Select a file for operations", uploaded_file_names)
+
+    if selected_file:
+        file_path = os.path.join("uploaded_files", selected_file)
+        if selected_file.endswith(".csv"):
+            st.session_state.df = pd.read_csv(file_path)
+        elif selected_file.endswith((".xlsx", ".xls")):
+            st.session_state.df = pd.read_excel(file_path)
+        st.session_state.uploaded_file = selected_file
 
 # Function to select operations for cleaning or transformation
 def select_operations(operation_type):
@@ -139,7 +197,6 @@ def generate_pdf_report(summary, graphs, filename):
     c.save()
 
 # Groq AI bot - Modified for human-like responses
-
 def get_groq_response(user_prompt, df, data_scope="full"):
     try:
         llm = ChatGroq(
@@ -184,10 +241,10 @@ def get_groq_response(user_prompt, df, data_scope="full"):
             return "🚨 Token limit reached! Subscribe to premium for unlimited insights."
         return f"❌ Error: {str(e)}"
 
-
 # Page for Data Cleaning
 def cleaning_page():
     st.header("Data Cleaning")
+    select_file()
     if st.session_state.df is not None:
         st.write("### Data Preview")
 
@@ -224,6 +281,7 @@ def cleaning_page():
 # Page for Data Transformation
 def transformation_page():
     st.header("Data Transformation")
+    select_file()
     if st.session_state.df is not None:
         st.write("### Data Preview")
 
@@ -260,6 +318,7 @@ def transformation_page():
 # Page for Visualization
 def visualization_page():
     st.header("Data Visualization")
+    select_file()
     if st.session_state.df is not None:
         df = st.session_state.df
 
@@ -367,11 +426,10 @@ def visualization_page():
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
 
-
 # Page for SQL Query and DataFrame Editing
 def sql_query_page():
     st.header("SQL Query and DataFrame Editing")
-    
+    select_file()
     if st.session_state.df is not None:
         st.write("### Data Preview")
         
@@ -411,6 +469,7 @@ def render_chart(_fig, _key):
 
 def export_report_page():
     st.header("Export Report")
+    select_file()
     if st.session_state.df is not None:
         # Access pre-generated summary
         summary = st.session_state.summary 
@@ -460,19 +519,42 @@ def export_report_page():
 # Page for AI Chat Platform
 def ai_chat_page():
     st.header("AI Chat Platform")
+    select_file()
     
-    if st.session_state.df is not None:
-        st.success(f"Uploaded File: {st.session_state.uploaded_file.name}")
+    # Ensure uploaded_file is initialized
+    if 'uploaded_file' not in st.session_state:
+        st.session_state.uploaded_file = None
+
+    # Display uploaded file information
+    if st.session_state.uploaded_file is not None:
+        st.success(f"Uploaded File: {st.session_state.uploaded_file}")
         st.write("### Data Preview")
         st.dataframe(st.session_state.df.head(20), height=200, use_container_width=True)
 
-    user_query = st.text_input("Ask the Dabby anything about the data:", key="user_query")
+    # User query input
+    user_query = st.text_input("Ask the Dabby anything about the data:", key="user_query", label_visibility="collapsed")
     
+    # Initialize chat history in session state
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    # Process user query
     if st.button("Send") or (user_query and st.session_state.get("enter_pressed", False)):
         response = get_groq_response(user_query, st.session_state.df)
         st.write("### Datalis Dabby Suggests")
         st.write(response)
+        
+        # Record the query and response in chat history
+        st.session_state.chat_history.append({"query": user_query, "response": response})
         st.session_state["enter_pressed"] = False
+
+    # Display chat history in a new sidebar on the right
+    with st.sidebar:
+        st.title("Chat History")
+        for entry in st.session_state.chat_history:
+            st.write(f"**Query:** {entry['query']}")
+            st.write(f"**Response:** {entry['response']}")
+            st.write("---")
 
     if st.session_state.get("user_query") and st.session_state.get("user_query") != "":
         st.session_state["enter_pressed"] = True
@@ -648,16 +730,7 @@ def main():
         st.session_state.page = "Upload Data"
 
     if st.session_state.page == "Upload Data":
-        uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx", "xls"])
-        if uploaded_file is not None:
-            if uploaded_file.type == "text/csv":
-                st.session_state.df = pd.read_csv(uploaded_file)
-            elif uploaded_file.type in ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]:
-                st.session_state.df = pd.read_excel(uploaded_file)
-            
-            st.session_state.uploaded_file = uploaded_file
-            st.write("### Data Preview")
-            st.dataframe(st.session_state.df, height=300, use_container_width=True)
+        upload_files()
 
     elif st.session_state.page == "Data Cleaning":
         cleaning_page()
@@ -678,6 +751,5 @@ def main():
         export_report_page()
 
 if __name__ == '__main__':
-    main() 
-
+    main()
 
