@@ -412,7 +412,6 @@ def visualization_page():
 # Page for AI Chat Platform
 def ai_chat_page():
     st.header("AI Chat Platform")
-    select_file()
     
     # Ensure uploaded_file is initialized
     if 'uploaded_file' not in st.session_state:
@@ -424,29 +423,32 @@ def ai_chat_page():
         st.write("### Data Preview")
         st.dataframe(st.session_state.df.head(20), height=200, use_container_width=True)
 
-    # User query input
-    user_query = st.text_input("Ask the Dabby anything about the data:", key="user_query", label_visibility="collapsed")
-    
-    # Initialize chat history in session state
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-
-    # Process user query
-    if st.button("Send") or (user_query and st.session_state.get("enter_pressed", False)):
-        response = get_groq_response(user_query, st.session_state.df)
-        st.write("### Datalis Dabby Suggests")
-        st.write(response)
+        # User query input
+        user_query = st.text_input("Ask the Dabby anything about the data:", key="user_query", label_visibility="collapsed")
         
-        # Record the query and response in chat history
-        st.session_state.chat_history.append({"query": user_query, "response": response})
-        st.session_state["enter_pressed"] = False
+        # Initialize chat history in session state
+        if 'chat_history' not in st.session_state:
+            st.session_state.chat_history = []
 
-    if st.session_state.get("user_query") and st.session_state.get("user_query") != "":
-        st.session_state["enter_pressed"] = True
+        # Process user query
+        if st.button("Send") or (user_query and st.session_state.get("enter_pressed", False)):
+            response = get_groq_response(user_query, st.session_state.df)
+            st.write("### Datalis Dabby Suggests")
+            st.write(response)
+            
+            # Record the query and response in chat history
+            st.session_state.chat_history.append({"query": user_query, "response": response})
+            st.session_state["enter_pressed"] = False
 
-    # Add Next button
-    if st.button("Next", key="next_to_export"):
-        st.session_state.page = "Export Report"
+        if st.session_state.get("user_query") and st.session_state.get("user_query") != "":
+            st.session_state["enter_pressed"] = True
+
+        # Add Next button
+        if st.button("Next", key="next_to_export"):
+            st.session_state.page = "Export Report"
+    else:
+        st.warning("No data available. Please upload a CSV or Excel file.")
+
 
 # Page for Export Report
 @st.cache_resource
