@@ -62,9 +62,9 @@ def upload_files():
         st.write("### Data Preview")
         st.dataframe(st.session_state.df, height=300, use_container_width=True)
 
-        if st.button("Next", key="next_to_cleaning"):
-            st.session_state.page = "Data Cleaning"
-
+    # Add Next button
+    if st.button("Next", key="next_to_cleaning"):
+        st.session_state.page = "Data Cleaning"
 
 def select_file():
     uploaded_file_names = os.listdir("uploaded_files")
@@ -275,10 +275,12 @@ def cleaning_page():
                 file_name=csv_filename,
                 mime="text/csv"
             )
+
+        # Add Next button
+        if st.button("Next", key="next_to_transformation"):
+            st.session_state.page = "Data Transformation"
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
-    st.button("Next", key="next_to_transformation"):
-        st.session_state.page = "Data Transformation"
 
 # Page for Data Transformation
 def transformation_page():
@@ -314,11 +316,12 @@ def transformation_page():
                 file_name=csv_filename,
                 mime="text/csv"
             )
+
+        # Add Next button
+        if st.button("Next", key="next_to_visualization"):
+            st.session_state.page = "Data Visualization"
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
-
-    st.button("Next", key="next_to_visualization"):
-            st.session_state.page = "Data Visualization"
 
 # Page for Visualization
 def visualization_page():
@@ -428,102 +431,9 @@ def visualization_page():
                 st.session_state.summary = get_groq_response("Provide a summary of the dataset.", st.session_state.df)
                 st.success("Data summary generated!")
 
-    else:
-        st.warning("No data available. Please upload a CSV or Excel file.")
-
-    if st.button("Next", key="next_to_ai_chat"):
+        # Add Next button
+        if st.button("Next", key="next_to_ai_chat"):
             st.session_state.page = "AI Chat Platform"
-
-    st.button("Next", key="next_to_export"):
-            st.session_state.page = "Export Report"
-
-# Page for SQL Query and DataFrame Editing
-def sql_query_page():
-    st.header("SQL Query and DataFrame Editing")
-    select_file()
-    if st.session_state.df is not None:
-        st.write("### Data Preview")
-        
-        # Toggle button for editing
-        edit_mode = st.checkbox("Enable Editing", value=False)
-        
-        if edit_mode:
-            # Display editable DataFrame
-            edited_df = st.data_editor(st.session_state.df, height=300, use_container_width=True)
-            # Update the session state with the edited DataFrame
-            st.session_state.df = edited_df
-        else:
-            # Display non-editable DataFrame
-            st.dataframe(st.session_state.df, height=300, use_container_width=True)
-
-        # SQL Query Input
-        st.write("### Enter Your SQL Query:")
-        st.markdown("**Demo Query (shows all data):**  `SELECT * FROM data`")
-        sql_query = st.text_area("", value="SELECT * FROM data", height=100)
-        
-        if st.button("Execute SQL Query"):
-            try:
-                # Execute SQL query on the DataFrame
-                result_df = ps.sqldf(sql_query, {"data": st.session_state.df})
-                st.write("### Query Results")
-                st.dataframe(result_df, height=300, use_container_width=True)
-            except Exception as e:
-                st.error(f"Error executing query: {e}")
-
-    else:
-        st.warning("No data available. Please upload a CSV or Excel file.")
-
-# Page for Export Report
-@st.cache_resource
-def render_chart(_fig, _key):
-    st.plotly_chart(_fig, key=_key, use_container_width=True) 
-
-def export_report_page():
-    st.header("Export Report")
-    select_file()
-    if st.session_state.df is not None:
-        # Access pre-generated summary
-        summary = st.session_state.summary 
-
-        st.write("### Data Summary")
-        st.write(summary)
-
-        st.write("### Selected Graphs for Report")
-        if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
-            for i, graph in enumerate(st.session_state.selected_graphs):
-                render_chart(go.Figure(graph), f"chart_{i}")
-
-        st.write("### Export Options")
-        
-        col1, col2 = st.columns(2)  # Create two columns for buttons
-
-        with col1:
-            if st.button("Generate Word Report"):
-                with st.spinner('Generating Word report...'):
-                    report_filename = "data_summary_report.docx"
-                    generate_word_report(summary, st.session_state.selected_graphs, report_filename)
-                    with open(report_filename, "rb") as f:
-                        st.download_button(
-                            label="Download Word Report",
-                            data=f,
-                            file_name=report_filename,
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        )
-                    st.success("Word report generated successfully!")
-
-        with col2:
-            if st.button("Generate PDF Report"):
-                with st.spinner('Generating PDF report...'):
-                    report_filename = "data_summary_report.pdf"
-                    generate_pdf_report(summary, st.session_state.selected_graphs, report_filename)
-                    with open(report_filename, "rb") as f:
-                        st.download_button(
-                            label="Download PDF Report",
-                            data=f,
-                            file_name=report_filename,
-                            mime="application/pdf"
-                        )
-                    st.success("PDF report generated successfully!")
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
 
@@ -569,6 +479,47 @@ def ai_chat_page():
 
     if st.session_state.get("user_query") and st.session_state.get("user_query") != "":
         st.session_state["enter_pressed"] = True
+
+    # Add Next button
+    if st.button("Next", key="next_to_export"):
+        st.session_state.page = "Export Report"
+
+# Page for Export Report
+@st.cache_resource
+def render_chart(_fig, _key):
+    st.plotly_chart(_fig, key=_key, use_container_width=True) 
+
+def export_report_page():
+    st.header("Export Report")
+    select_file()
+    if st.session_state.df is not None:
+        # Access pre-generated summary
+        summary = st.session_state.summary 
+
+        st.write("### Data Summary")
+        st.write(summary)
+
+        st.write("### Selected Graphs for Report")
+        if 'selected_graphs' in st.session_state and st.session_state.selected_graphs:
+            for i, graph in enumerate(st.session_state.selected_graphs):
+                render_chart(go.Figure(graph), f"chart_{i}")
+
+        st.write("### Export Options")
+        
+        if st.button("Generate Word Report"):
+            with st.spinner('Generating Word report...'):
+                report_filename = "data_summary_report.docx"
+                generate_word_report(summary, st.session_state.selected_graphs, report_filename)
+                with open(report_filename, "rb") as f:
+                    st.download_button(
+                        label="Download Word Report",
+                        data=f,
+                        file_name=report_filename,
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                st.success("Word report generated successfully!")
+    else:
+        st.warning("No data available. Please upload a CSV or Excel file.")
 
 # Main App Functionality
 def main():
@@ -755,12 +706,8 @@ def main():
     elif st.session_state.page == "AI Chat Platform":
         ai_chat_page()
 
-    elif st.session_state.page == "SQL Query and Edit DataFrame":
-        sql_query_page()
-
     elif st.session_state.page == "Export Report":
         export_report_page()
 
 if __name__ == '__main__':
     main()
-
