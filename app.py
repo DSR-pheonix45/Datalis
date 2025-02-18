@@ -63,7 +63,7 @@ def upload_files():
         st.dataframe(st.session_state.df, height=300, use_container_width=True)
 
         if st.button("Next", key="next_to_cleaning"):
-        st.session_state.page = "Data Cleaning"
+            st.session_state.page = "Data Cleaning"
 
 
 def select_file():
