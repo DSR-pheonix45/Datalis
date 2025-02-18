@@ -279,7 +279,7 @@ def cleaning_page():
         st.warning("No data available. Please upload a CSV or Excel file.")
 
         st.button("Next", key="next_to_transformation"):
-        st.session_state.page = "Data Transformation"
+            st.session_state.page = "Data Transformation"
 
 # Page for Data Transformation
 def transformation_page():
