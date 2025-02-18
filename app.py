@@ -62,6 +62,9 @@ def upload_files():
         st.write("### Data Preview")
         st.dataframe(st.session_state.df, height=300, use_container_width=True)
 
+        if st.button("Next", key="next_to_cleaning"):
+        st.session_state.page = "Data Cleaning"
+
 
 def select_file():
     uploaded_file_names = os.listdir("uploaded_files")
@@ -275,6 +278,9 @@ def cleaning_page():
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
 
+        st.button("Next", key="next_to_transformation"):
+        st.session_state.page = "Data Transformation"
+
 # Page for Data Transformation
 def transformation_page():
     st.header("Data Transformation")
@@ -311,6 +317,9 @@ def transformation_page():
             )
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
+
+    st.button("Next", key="next_to_visualization"):
+            st.session_state.page = "Data Visualization"
 
 # Page for Visualization
 def visualization_page():
@@ -422,6 +431,12 @@ def visualization_page():
 
     else:
         st.warning("No data available. Please upload a CSV or Excel file.")
+
+    if st.button("Next", key="next_to_ai_chat"):
+            st.session_state.page = "AI Chat Platform"
+
+    st.button("Next", key="next_to_export"):
+            st.session_state.page = "Export Report"
 
 # Page for SQL Query and DataFrame Editing
 def sql_query_page():
