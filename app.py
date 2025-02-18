@@ -29,8 +29,7 @@ def display_intro():
     - **Data Transformation**: Transform your data by renaming columns, converting data types, and more.
     - **Data Visualization**: Create various types of charts to visualize your data, including histograms, line charts, and scatter plots.
     - **AI Chat Platform**: Interact with our AI to get insights and answers about your data.
-    - **SQL Query and Edit DataFrame**: Execute SQL queries on your data and edit DataFrames directly.
-    - **Export Report**: Generate and download reports in Word or PDF format based on your analysis.
+    - **Export Report**: Generate and download reports in Word format based on your analysis.
 
     Navigate through these sections using the sidebar on the left. Let's get started by uploading your data!
     """)
@@ -67,16 +66,12 @@ def upload_files():
         st.session_state.page = "Data Cleaning"
 
 def select_file():
-    uploaded_file_names = os.listdir("uploaded_files")
-    selected_file = st.selectbox("Select a file for operations", uploaded_file_names)
-
-    if selected_file:
-        file_path = os.path.join("uploaded_files", selected_file)
-        if selected_file.endswith(".csv"):
+    if 'uploaded_file' in st.session_state:
+        file_path = os.path.join("uploaded_files", st.session_state.uploaded_file)
+        if st.session_state.uploaded_file.endswith(".csv"):
             st.session_state.df = pd.read_csv(file_path)
-        elif selected_file.endswith((".xlsx", ".xls")):
+        elif st.session_state.uploaded_file.endswith((".xlsx", ".xls")):
             st.session_state.df = pd.read_excel(file_path)
-        st.session_state.uploaded_file = selected_file
 
 # Function to select operations for cleaning or transformation
 def select_operations(operation_type):
@@ -172,29 +167,6 @@ def generate_word_report(summary, graphs, filename):
         os.remove(img_filename)
 
     doc.save(filename)
-
-# Generate PDF report with improved layout
-def generate_pdf_report(summary, graphs, filename):
-    c = canvas.Canvas(filename, pagesize=letter)
-    c.setFont("Helvetica", 12)
-
-    # Data Summary (with text wrapping)
-    text_object = c.beginText(1 * inch, 10 * inch)
-    lines = summary.split('\n')  # Split summary into lines
-    for line in lines:
-        text_object.textLine(line)
-    c.drawText(text_object)
-
-    # Graphs (with alignment and spacing)
-    y_position = 8 * inch
-    for i, fig in enumerate(graphs):
-        img_filename = f"temp_chart_{i}.png"
-        fig.write_image(img_filename)
-        c.drawImage(img_filename, 1 * inch, y_position, width=5 * inch, height=3 * inch, preserveAspectRatio=True)
-        y_position -= 4 * inch  # Adjust spacing as needed
-        os.remove(img_filename)
-
-    c.save()
 
 # Groq AI bot - Modified for human-like responses
 def get_groq_response(user_prompt, df, data_scope="full"):
@@ -469,14 +441,6 @@ def ai_chat_page():
         st.session_state.chat_history.append({"query": user_query, "response": response})
         st.session_state["enter_pressed"] = False
 
-    # Display chat history in a new sidebar on the right
-    with st.sidebar:
-        st.title("Chat History")
-        for entry in st.session_state.chat_history:
-            st.write(f"**Query:** {entry['query']}")
-            st.write(f"**Response:** {entry['response']}")
-            st.write("---")
-
     if st.session_state.get("user_query") and st.session_state.get("user_query") != "":
         st.session_state["enter_pressed"] = True
 
@@ -640,9 +604,6 @@ def main():
         .sidebar .stButton[data-testid="ai_chat_platform"]>button:before {
            content: "\f086"; /* Comment Dots Icon */
         } 
-        .sidebar .stButton[data-testid="sql_query"]>button:before {
-           content: "\f1c0"; /* Database Icon */
-        } 
         .sidebar .stButton[data-testid="export_report"]>button:before {
            content: "\f019"; /* Download Icon */
         }
@@ -683,8 +644,6 @@ def main():
         st.session_state.page = "Data Visualization"
     if st.sidebar.button("AI Chat Platform", key="ai_chat_platform"):
         st.session_state.page = "AI Chat Platform"
-    if st.sidebar.button("SQL Query and Edit DataFrame", key="sql_query"):
-        st.session_state.page = "SQL Query and Edit DataFrame"
     if st.sidebar.button("Export Report", key="export_report"):
         st.session_state.page = "Export Report"
 
@@ -711,3 +670,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
