@@ -38,33 +38,30 @@ def display_intro():
 def upload_files():
     display_intro()
     st.header("Upload Data")
-    uploaded_files = st.file_uploader("Drag and drop CSV or Excel files here", type=["csv", "xlsx", "xls"], accept_multiple_files=True)
+    uploaded_file = st.file_uploader("Drag and drop a CSV or Excel file here", type=["csv", "xlsx", "xls"], accept_multiple_files=False)
 
-    if uploaded_files:
+    if uploaded_file:
         upload_dir = "uploaded_files"
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
 
-        for uploaded_file in uploaded_files:
-            file_path = os.path.join(upload_dir, uploaded_file.name)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            st.success(f"Uploaded {uploaded_file.name}")
+        file_path = os.path.join(upload_dir, uploaded_file.name)
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.success(f"Uploaded {uploaded_file.name}")
 
-        st.write("### Uploaded Files")
-        uploaded_file_names = os.listdir(upload_dir)
-        selected_file = st.selectbox("Select a file for operations", uploaded_file_names)
+        st.write("### Uploaded File")
+        st.write(uploaded_file.name)
 
-        if selected_file:
-            file_path = os.path.join(upload_dir, selected_file)
-            if selected_file.endswith(".csv"):
-                st.session_state.df = pd.read_csv(file_path)
-            elif selected_file.endswith((".xlsx", ".xls")):
-                st.session_state.df = pd.read_excel(file_path)
+        if uploaded_file.name.endswith(".csv"):
+            st.session_state.df = pd.read_csv(file_path)
+        elif uploaded_file.name.endswith((".xlsx", ".xls")):
+            st.session_state.df = pd.read_excel(file_path)
 
-            st.session_state.uploaded_file = selected_file
-            st.write("### Data Preview")
-            st.dataframe(st.session_state.df, height=300, use_container_width=True)
+        st.session_state.uploaded_file = uploaded_file.name
+        st.write("### Data Preview")
+        st.dataframe(st.session_state.df, height=300, use_container_width=True)
+
 
 def select_file():
     uploaded_file_names = os.listdir("uploaded_files")
